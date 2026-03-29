@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Painel de Keys</title>
 
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -17,21 +19,21 @@
     }
 
     .wrap {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
     }
 
-    h1 {
+    h1, h2, h3 {
       margin-top: 0;
-      margin-bottom: 20px;
     }
 
     .card {
       background: #12181d;
       border: 1px solid #24303a;
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 18px;
       margin-bottom: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
     }
 
     .row {
@@ -45,31 +47,46 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+      min-width: 180px;
+    }
+
+    label {
+      font-size: 13px;
+      color: #9fb3c8;
     }
 
     input, button {
       padding: 10px 12px;
       border-radius: 8px;
-      border: 1px solid #33424f;
       font-size: 14px;
     }
 
     input {
       background: #0e1418;
       color: #fff;
-      min-width: 180px;
+      border: 1px solid #33424f;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #19c37d;
     }
 
     button {
-      background: #19c37d;
-      color: #08110d;
       border: none;
-      font-weight: bold;
       cursor: pointer;
+      font-weight: bold;
+      transition: .15s ease;
     }
 
     button:hover {
-      filter: brightness(0.95);
+      transform: translateY(-1px);
+      filter: brightness(.97);
+    }
+
+    .btn-primary {
+      background: #19c37d;
+      color: #08110d;
     }
 
     .btn-secondary {
@@ -82,234 +99,572 @@
       color: #fff;
     }
 
+    .btn-warning {
+      background: #f59e0b;
+      color: #111827;
+    }
+
     .btn-logout {
       background: #6b7280;
       color: #fff;
+    }
+
+    .btn-small {
+      padding: 8px 10px;
+      font-size: 12px;
+      border-radius: 7px;
     }
 
     .msg {
       margin-top: 12px;
       min-height: 20px;
       color: #9dd6ff;
+      white-space: pre-wrap;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
+    .msg.error {
+      color: #ff9aa4;
     }
 
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #22303a;
-      text-align: left;
-      font-size: 14px;
-      vertical-align: top;
-      word-break: break-word;
+    .msg.success {
+      color: #7df0ad;
     }
-
-    th {
-      color: #9fb3c8;
-    }
-
-    .tag {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    .tag-disponível { background: #1f3b2c; color: #7df0ad; }
-    .tag-ativa { background: #1d3348; color: #86c7ff; }
-    .tag-expirada { background: #4a3a19; color: #ffd76e; }
-    .tag-revogada { background: #4b1f25; color: #ff9aa4; }
 
     .hidden {
       display: none;
     }
 
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .stat-box {
+      background: #0f151a;
+      border: 1px solid #24303a;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .stat-box .title {
+      color: #9fb3c8;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .stat-box .value {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-row {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .search-row input {
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #22303a;
+      text-align: left;
+      font-size: 14px;
+      vertical-align: middle;
+      word-break: break-word;
+    }
+
+    th {
+      color: #9fb3c8;
+      background: #0f151a;
+      position: sticky;
+      top: 0;
+    }
+
+    code {
+      background: #0b1115;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #22303a;
+      display: inline-block;
+      font-size: 13px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .tag-disponivel {
+      background: #1f3b2c;
+      color: #7df0ad;
+    }
+
+    .tag-ativa {
+      background: #1d3348;
+      color: #86c7ff;
+    }
+
+    .tag-expirada {
+      background: #4a3a19;
+      color: #ffd76e;
+    }
+
+    .tag-revogada {
+      background: #4b1f25;
+      color: #ff9aa4;
+    }
+
+    .muted {
+      color: #9fb3c8;
+      font-size: 12px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     @media (max-width: 900px) {
-      table, thead, tbody, th, td, tr { display: block; }
-      thead { display: none; }
-
-      tr {
-        margin-bottom: 14px;
-        border: 1px solid #22303a;
-        border-radius: 10px;
-        padding: 10px;
-      }
-
-      td {
-        border: none;
-        padding: 6px 0;
+      body {
+        padding: 14px;
       }
     }
   </style>
 </head>
-
 <body>
   <div class="wrap">
-
-    <!-- LOGIN -->
     <div id="loginCard" class="card">
       <h1>Login Admin</h1>
 
       <div class="row">
         <div class="field">
           <label>Usuário</label>
-          <input type="text" id="username">
+          <input type="text" id="username" placeholder="Digite o usuário" />
         </div>
 
         <div class="field">
           <label>Senha</label>
-          <input type="password" id="password">
+          <input type="password" id="password" placeholder="Digite a senha" />
         </div>
 
-        <button onclick="login()">Entrar</button>
+        <button class="btn-primary" onclick="login()">Entrar</button>
       </div>
 
       <div class="msg" id="loginMsg"></div>
     </div>
 
-    <!-- PAINEL -->
     <div id="panelWrap" class="hidden">
+      <div class="topbar">
+        <h1>Painel de Keys</h1>
 
-      <h1>Painel de Keys</h1>
+        <div class="row">
+          <button class="btn-secondary" onclick="testarConexao()">Testar conexão</button>
+          <button class="btn-logout" onclick="logout()">Sair</button>
+        </div>
+      </div>
 
       <div class="card">
         <div class="row">
           <div class="field">
             <label>Dias</label>
-            <input type="number" id="days" value="30">
+            <input type="number" id="days" value="30" min="1" />
           </div>
 
-          <button onclick="gerarKey()">Gerar key</button>
-          <button class="btn-secondary" onclick="listarKeys()">Atualizar</button>
-          <button class="btn-logout" onclick="logout()">Sair</button>
+          <button class="btn-primary" onclick="gerarKey()">Gerar key</button>
+          <button class="btn-secondary" onclick="listarKeys()">Atualizar lista</button>
         </div>
 
         <div class="msg" id="msg"></div>
+
+        <div class="stats">
+          <div class="stat-box">
+            <div class="title">Total</div>
+            <div class="value" id="statTotal">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="title">Disponíveis</div>
+            <div class="value" id="statDisponiveis">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="title">Ativas</div>
+            <div class="value" id="statAtivas">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="title">Revogadas</div>
+            <div class="value" id="statRevogadas">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="title">Expiradas</div>
+            <div class="value" id="statExpiradas">0</div>
+          </div>
+        </div>
       </div>
 
       <div class="card">
-        <h3>Keys</h3>
-        <div id="totalKeys"></div>
-        <div id="keysTable"></div>
-      </div>
+        <h3>Lista de Keys</h3>
 
+        <div class="search-row">
+          <input type="text" id="searchInput" placeholder="Buscar por key..." oninput="renderTabela()" />
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Status</th>
+                <th>Criada em</th>
+                <th>Expira em</th>
+                <th>Ativada em</th>
+                <th>Dispositivo</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="keysTableBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
-<script>
-  // 🔥 AQUI É A CORREÇÃO
-  const API = "https://meu-servidor-5had.onrender.com";
+  <script>
+    const API = "https://meu-servidor-5had.onrender.com";
 
-  function getAuthHeaders() {
-    return {
-      "Content-Type": "application/json",
-      "x-admin-user": localStorage.getItem("adminUser") || "",
-      "x-admin-pass": localStorage.getItem("adminPass") || ""
-    };
-  }
+    let allKeys = [];
 
-  function showLogin() {
-    loginCard.classList.remove("hidden");
-    panelWrap.classList.add("hidden");
-  }
+    const loginCard = document.getElementById("loginCard");
+    const panelWrap = document.getElementById("panelWrap");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const loginMsg = document.getElementById("loginMsg");
+    const msg = document.getElementById("msg");
+    const days = document.getElementById("days");
+    const searchInput = document.getElementById("searchInput");
+    const keysTableBody = document.getElementById("keysTableBody");
 
-  function showPanel() {
-    loginCard.classList.add("hidden");
-    panelWrap.classList.remove("hidden");
-  }
+    const statTotal = document.getElementById("statTotal");
+    const statDisponiveis = document.getElementById("statDisponiveis");
+    const statAtivas = document.getElementById("statAtivas");
+    const statRevogadas = document.getElementById("statRevogadas");
+    const statExpiradas = document.getElementById("statExpiradas");
 
-  async function login() {
-    const username = usernameInput.value.trim();
-    const password = passwordInput.value.trim();
-
-    if (!username || !password) {
-      loginMsg.innerText = "Preencha tudo";
-      return;
+    function showLogin() {
+      loginCard.classList.remove("hidden");
+      panelWrap.classList.add("hidden");
     }
 
-    const res = await fetch(API + "/admin-login", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ username, password })
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      localStorage.setItem("adminUser", username);
-      localStorage.setItem("adminPass", password);
-      showPanel();
-      listarKeys();
-    } else {
-      loginMsg.innerText = "Login inválido";
+    function showPanel() {
+      loginCard.classList.add("hidden");
+      panelWrap.classList.remove("hidden");
     }
-  }
 
-  function logout() {
-    localStorage.clear();
-    showLogin();
-  }
-
-  async function gerarKey() {
-    msg.innerText = "Gerando...";
-
-    const res = await fetch(API + "/generate-key", {
-      method: "POST",
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ days: Number(days.value) || 30 })
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      msg.innerText = "Key: " + data.keyData.key;
-      listarKeys();
-    } else {
-      msg.innerText = data.message;
+    function setMessage(el, text, type = "") {
+      el.className = "msg" + (type ? " " + type : "");
+      el.innerText = text;
     }
-  }
 
-  async function listarKeys() {
-    const res = await fetch(API + "/keys", {
-      headers: getAuthHeaders()
-    });
+    function getAuthHeaders() {
+      return {
+        "Content-Type": "application/json",
+        "x-admin-user": localStorage.getItem("adminUser") || "",
+        "x-admin-pass": localStorage.getItem("adminPass") || ""
+      };
+    }
 
-    const data = await res.json();
+    function formatDate(value) {
+      if (!value) return "-";
+      const d = new Date(value);
+      if (isNaN(d.getTime())) return "-";
+      return d.toLocaleString("pt-BR");
+    }
 
-    totalKeys.innerText = "Total: " + data.total;
+    function getStatusLabel(keyObj) {
+      const now = Date.now();
 
-    keysTable.innerHTML = data.keys.map(k => `
-      <div style="margin-bottom:10px">
-        ${k.key} | ${k.status}
-      </div>
-    `).join("");
-  }
+      if (keyObj.revoked === true || keyObj.status === "revogada") {
+        return { text: "Revogada", className: "tag-revogada" };
+      }
 
-  const loginCard = document.getElementById("loginCard");
-  const panelWrap = document.getElementById("panelWrap");
-  const usernameInput = document.getElementById("username");
-  const passwordInput = document.getElementById("password");
-  const loginMsg = document.getElementById("loginMsg");
-  const msg = document.getElementById("msg");
-  const totalKeys = document.getElementById("totalKeys");
-  const keysTable = document.getElementById("keysTable");
-  const days = document.getElementById("days");
+      if (keyObj.expiresAt && new Date(keyObj.expiresAt).getTime() < now) {
+        return { text: "Expirada", className: "tag-expirada" };
+      }
 
-  function init() {
-    if (localStorage.getItem("adminUser")) {
-      showPanel();
-      listarKeys();
-    } else {
+      if (keyObj.active === true || keyObj.status === "ativa") {
+        return { text: "Ativa", className: "tag-ativa" };
+      }
+
+      return { text: "Disponível", className: "tag-disponivel" };
+    }
+
+    function calcularStats(lista) {
+      let disponiveis = 0;
+      let ativas = 0;
+      let revogadas = 0;
+      let expiradas = 0;
+
+      for (const item of lista) {
+        const st = getStatusLabel(item).text;
+        if (st === "Disponível") disponiveis++;
+        if (st === "Ativa") ativas++;
+        if (st === "Revogada") revogadas++;
+        if (st === "Expirada") expiradas++;
+      }
+
+      statTotal.innerText = lista.length;
+      statDisponiveis.innerText = disponiveis;
+      statAtivas.innerText = ativas;
+      statRevogadas.innerText = revogadas;
+      statExpiradas.innerText = expiradas;
+    }
+
+    function copiarTexto(texto) {
+      navigator.clipboard.writeText(texto)
+        .then(() => setMessage(msg, "Key copiada com sucesso.", "success"))
+        .catch(() => setMessage(msg, "Não foi possível copiar a key.", "error"));
+    }
+
+    function renderTabela() {
+      const termo = searchInput.value.trim().toLowerCase();
+
+      const filtradas = allKeys.filter(k => {
+        const keyText = String(k.key || "").toLowerCase();
+        return keyText.includes(termo);
+      });
+
+      calcularStats(allKeys);
+
+      if (!filtradas.length) {
+        keysTableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="muted">Nenhuma key encontrada.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      keysTableBody.innerHTML = filtradas.map(k => {
+        const st = getStatusLabel(k);
+        const keySafe = String(k.key || "").replace(/'/g, "\\'");
+        const podeRevogar = st.text !== "Revogada";
+        const podeReativar = st.text === "Revogada";
+
+        return `
+          <tr>
+            <td><code>${k.key || "-"}</code></td>
+            <td><span class="tag ${st.className}">${st.text}</span></td>
+            <td>${formatDate(k.createdAt)}</td>
+            <td>${formatDate(k.expiresAt)}</td>
+            <td>${formatDate(k.activatedAt)}</td>
+            <td>${k.usedBy || "-"}</td>
+            <td>
+              <div class="actions">
+                <button class="btn-secondary btn-small" onclick="copiarTexto('${keySafe}')">Copiar</button>
+                ${podeRevogar ? `<button class="btn-danger btn-small" onclick="revogarKey('${keySafe}')">Revogar</button>` : ""}
+                ${podeReativar ? `<button class="btn-warning btn-small" onclick="reativarKey('${keySafe}')">Reativar</button>` : ""}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function requestJson(url, options = {}) {
+      const finalOptions = {
+        ...options,
+        headers: {
+          ...(options.headers || {})
+        }
+      };
+
+      const res = await fetch(url, finalOptions);
+      const text = await res.text();
+
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        throw new Error("Resposta inválida do servidor.");
+      }
+
+      if (!res.ok) {
+        throw new Error(data.message || `Erro HTTP ${res.status}`);
+      }
+
+      return data;
+    }
+
+    async function login() {
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      if (!username || !password) {
+        setMessage(loginMsg, "Preencha usuário e senha.", "error");
+        return;
+      }
+
+      setMessage(loginMsg, "Entrando...");
+
+      try {
+        const data = await requestJson(API + "/admin-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (data.success) {
+          localStorage.setItem("adminUser", username);
+          localStorage.setItem("adminPass", password);
+          setMessage(loginMsg, "Login realizado com sucesso.", "success");
+          showPanel();
+          listarKeys();
+        } else {
+          setMessage(loginMsg, data.message || "Login inválido.", "error");
+        }
+      } catch (error) {
+        setMessage(loginMsg, "Erro ao conectar no servidor: " + error.message, "error");
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("adminUser");
+      localStorage.removeItem("adminPass");
       showLogin();
     }
-  }
 
-  init();
-</script>
+    async function testarConexao() {
+      setMessage(msg, "Testando conexão...");
+
+      try {
+        const data = await requestJson(API + "/health");
+        setMessage(msg, data.message || "Servidor online.", "success");
+      } catch (error) {
+        setMessage(msg, "Falha na conexão: " + error.message, "error");
+      }
+    }
+
+    async function gerarKey() {
+      setMessage(msg, "Gerando key...");
+
+      try {
+        const data = await requestJson(API + "/generate-key", {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ days: Number(days.value) || 30 })
+        });
+
+        if (data.success) {
+          const keyGerada = data.keyData?.key || data.key || "";
+          setMessage(msg, "Key gerada com sucesso: " + keyGerada, "success");
+          await listarKeys();
+        } else {
+          setMessage(msg, data.message || "Não foi possível gerar a key.", "error");
+        }
+      } catch (error) {
+        setMessage(msg, "Erro ao gerar key: " + error.message, "error");
+      }
+    }
+
+    async function revogarKey(key) {
+      if (!confirm("Tem certeza que deseja revogar esta key?")) return;
+
+      setMessage(msg, "Revogando key...");
+
+      try {
+        const data = await requestJson(API + "/revoke-key", {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ key })
+        });
+
+        setMessage(msg, data.message || "Key revogada com sucesso.", "success");
+        await listarKeys();
+      } catch (error) {
+        setMessage(msg, "Erro ao revogar key: " + error.message, "error");
+      }
+    }
+
+    async function reativarKey(key) {
+      if (!confirm("Tem certeza que deseja reativar esta key?")) return;
+
+      setMessage(msg, "Reativando key...");
+
+      try {
+        const data = await requestJson(API + "/reactivate-key", {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ key })
+        });
+
+        setMessage(msg, data.message || "Key reativada com sucesso.", "success");
+        await listarKeys();
+      } catch (error) {
+        setMessage(msg, "Erro ao reativar key: " + error.message, "error");
+      }
+    }
+
+    async function listarKeys() {
+      setMessage(msg, "Carregando keys...");
+
+      try {
+        const data = await requestJson(API + "/keys", {
+          method: "GET",
+          headers: getAuthHeaders()
+        });
+
+        allKeys = Array.isArray(data.keys) ? data.keys : [];
+        renderTabela();
+        setMessage(msg, "Lista atualizada com sucesso.", "success");
+      } catch (error) {
+        allKeys = [];
+        renderTabela();
+        setMessage(msg, "Erro ao listar keys: " + error.message, "error");
+      }
+    }
+
+    async function init() {
+      const hasUser = localStorage.getItem("adminUser");
+      const hasPass = localStorage.getItem("adminPass");
+
+      if (hasUser && hasPass) {
+        showPanel();
+        await listarKeys();
+      } else {
+        showLogin();
+      }
+    }
+
+    init();
+  </script>
 </body>
 </html>
