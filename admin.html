@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel de Keys</title>
+
   <style>
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -13,14 +15,17 @@
       color: #e8f0f7;
       padding: 24px;
     }
+
     .wrap {
       max-width: 1100px;
       margin: 0 auto;
     }
+
     h1 {
       margin-top: 0;
       margin-bottom: 20px;
     }
+
     .card {
       background: #12181d;
       border: 1px solid #24303a;
@@ -28,28 +33,33 @@
       padding: 18px;
       margin-bottom: 18px;
     }
+
     .row {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
       align-items: end;
     }
+
     .field {
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
+
     input, button {
       padding: 10px 12px;
       border-radius: 8px;
       border: 1px solid #33424f;
       font-size: 14px;
     }
+
     input {
       background: #0e1418;
       color: #fff;
       min-width: 180px;
     }
+
     button {
       background: #19c37d;
       color: #08110d;
@@ -57,31 +67,38 @@
       font-weight: bold;
       cursor: pointer;
     }
+
     button:hover {
       filter: brightness(0.95);
     }
+
     .btn-secondary {
       background: #2a3640;
       color: #fff;
     }
+
     .btn-danger {
       background: #e5484d;
       color: #fff;
     }
+
     .btn-logout {
       background: #6b7280;
       color: #fff;
     }
+
     .msg {
       margin-top: 12px;
       min-height: 20px;
       color: #9dd6ff;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 12px;
     }
+
     th, td {
       padding: 10px;
       border-bottom: 1px solid #22303a;
@@ -90,9 +107,11 @@
       vertical-align: top;
       word-break: break-word;
     }
+
     th {
       color: #9fb3c8;
     }
+
     .tag {
       display: inline-block;
       padding: 4px 8px;
@@ -100,22 +119,27 @@
       font-size: 12px;
       font-weight: bold;
     }
+
     .tag-disponível { background: #1f3b2c; color: #7df0ad; }
     .tag-ativa { background: #1d3348; color: #86c7ff; }
     .tag-expirada { background: #4a3a19; color: #ffd76e; }
     .tag-revogada { background: #4b1f25; color: #ff9aa4; }
+
     .hidden {
       display: none;
     }
+
     @media (max-width: 900px) {
       table, thead, tbody, th, td, tr { display: block; }
       thead { display: none; }
+
       tr {
         margin-bottom: 14px;
         border: 1px solid #22303a;
         border-radius: 10px;
         padding: 10px;
       }
+
       td {
         border: none;
         padding: 6px 0;
@@ -123,20 +147,23 @@
     }
   </style>
 </head>
+
 <body>
   <div class="wrap">
+
+    <!-- LOGIN -->
     <div id="loginCard" class="card">
       <h1>Login Admin</h1>
 
       <div class="row">
         <div class="field">
           <label>Usuário</label>
-          <input type="text" id="username" placeholder="Digite o usuário">
+          <input type="text" id="username">
         </div>
 
         <div class="field">
           <label>Senha</label>
-          <input type="password" id="password" placeholder="Digite a senha">
+          <input type="password" id="password">
         </div>
 
         <button onclick="login()">Entrar</button>
@@ -145,18 +172,20 @@
       <div class="msg" id="loginMsg"></div>
     </div>
 
+    <!-- PAINEL -->
     <div id="panelWrap" class="hidden">
+
       <h1>Painel de Keys</h1>
 
       <div class="card">
         <div class="row">
           <div class="field">
-            <label>Dias de validade</label>
-            <input type="number" id="days" value="30" min="1">
+            <label>Dias</label>
+            <input type="number" id="days" value="30">
           </div>
 
           <button onclick="gerarKey()">Gerar key</button>
-          <button class="btn-secondary" onclick="listarKeys()">Atualizar lista</button>
+          <button class="btn-secondary" onclick="listarKeys()">Atualizar</button>
           <button class="btn-logout" onclick="logout()">Sair</button>
         </div>
 
@@ -164,228 +193,123 @@
       </div>
 
       <div class="card">
-        <h3 style="margin-top:0;">Keys cadastradas</h3>
-        <div id="totalKeys" style="margin-bottom:10px;"></div>
+        <h3>Keys</h3>
+        <div id="totalKeys"></div>
         <div id="keysTable"></div>
       </div>
+
     </div>
   </div>
 
-  <script>
-    const API = "http://localhost:3000";
+<script>
+  // 🔥 AQUI É A CORREÇÃO
+  const API = "https://meu-servidor-5had.onrender.com";
 
-    function getAuthHeaders() {
-      const username = localStorage.getItem("adminUser") || "";
-      const password = localStorage.getItem("adminPass") || "";
+  function getAuthHeaders() {
+    return {
+      "Content-Type": "application/json",
+      "x-admin-user": localStorage.getItem("adminUser") || "",
+      "x-admin-pass": localStorage.getItem("adminPass") || ""
+    };
+  }
 
-      return {
-        "Content-Type": "application/json",
-        "x-admin-user": username,
-        "x-admin-pass": password
-      };
+  function showLogin() {
+    loginCard.classList.remove("hidden");
+    panelWrap.classList.add("hidden");
+  }
+
+  function showPanel() {
+    loginCard.classList.add("hidden");
+    panelWrap.classList.remove("hidden");
+  }
+
+  async function login() {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!username || !password) {
+      loginMsg.innerText = "Preencha tudo";
+      return;
     }
 
-    function formatDate(dateStr) {
-      if (!dateStr) return "-";
-      const d = new Date(dateStr);
-      return d.toLocaleString("pt-BR");
+    const res = await fetch(API + "/admin-login", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      localStorage.setItem("adminUser", username);
+      localStorage.setItem("adminPass", password);
+      showPanel();
+      listarKeys();
+    } else {
+      loginMsg.innerText = "Login inválido";
     }
+  }
 
-    function statusClass(status) {
-      return `tag tag-${status}`;
+  function logout() {
+    localStorage.clear();
+    showLogin();
+  }
+
+  async function gerarKey() {
+    msg.innerText = "Gerando...";
+
+    const res = await fetch(API + "/generate-key", {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ days: Number(days.value) || 30 })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      msg.innerText = "Key: " + data.keyData.key;
+      listarKeys();
+    } else {
+      msg.innerText = data.message;
     }
+  }
 
-    function showLogin() {
-      document.getElementById("loginCard").classList.remove("hidden");
-      document.getElementById("panelWrap").classList.add("hidden");
-    }
+  async function listarKeys() {
+    const res = await fetch(API + "/keys", {
+      headers: getAuthHeaders()
+    });
 
-    function showPanel() {
-      document.getElementById("loginCard").classList.add("hidden");
-      document.getElementById("panelWrap").classList.remove("hidden");
-    }
+    const data = await res.json();
 
-    async function login() {
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const msg = document.getElementById("loginMsg");
+    totalKeys.innerText = "Total: " + data.total;
 
-      msg.innerText = "";
+    keysTable.innerHTML = data.keys.map(k => `
+      <div style="margin-bottom:10px">
+        ${k.key} | ${k.status}
+      </div>
+    `).join("");
+  }
 
-      if (!username || !password) {
-        msg.innerText = "Digite usuário e senha.";
-        return;
-      }
+  const loginCard = document.getElementById("loginCard");
+  const panelWrap = document.getElementById("panelWrap");
+  const usernameInput = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
+  const loginMsg = document.getElementById("loginMsg");
+  const msg = document.getElementById("msg");
+  const totalKeys = document.getElementById("totalKeys");
+  const keysTable = document.getElementById("keysTable");
+  const days = document.getElementById("days");
 
-      try {
-        const res = await fetch(API + "/admin-login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password })
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-          localStorage.setItem("adminUser", username);
-          localStorage.setItem("adminPass", password);
-          msg.innerText = "Login realizado com sucesso.";
-          showPanel();
-          await listarKeys();
-        } else {
-          msg.innerText = data.message || "Login inválido.";
-        }
-      } catch (e) {
-        msg.innerText = "Erro ao conectar no servidor.";
-      }
-    }
-
-    function logout() {
-      localStorage.removeItem("adminUser");
-      localStorage.removeItem("adminPass");
+  function init() {
+    if (localStorage.getItem("adminUser")) {
+      showPanel();
+      listarKeys();
+    } else {
       showLogin();
     }
+  }
 
-    async function gerarKey() {
-      const msg = document.getElementById("msg");
-      const days = Number(document.getElementById("days").value) || 30;
-
-      msg.innerText = "Gerando key...";
-
-      try {
-        const res = await fetch(API + "/generate-key", {
-          method: "POST",
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ days })
-        });
-
-        const data = await res.json();
-
-        if (res.status === 401) {
-          msg.innerText = "Sessão inválida. Faça login novamente.";
-          logout();
-          return;
-        }
-
-        if (data.success) {
-          msg.innerText = "Key gerada: " + data.keyData.key;
-          await listarKeys();
-        } else {
-          msg.innerText = data.message || "Erro ao gerar key.";
-        }
-      } catch (e) {
-        msg.innerText = "Erro ao conectar no servidor.";
-      }
-    }
-
-    async function revogarKey(key) {
-      const ok = confirm("Revogar essa key?\n\n" + key);
-      if (!ok) return;
-
-      try {
-        const res = await fetch(API + "/revoke-key", {
-          method: "POST",
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ key })
-        });
-
-        const data = await res.json();
-
-        if (res.status === 401) {
-          alert("Sessão inválida. Faça login novamente.");
-          logout();
-          return;
-        }
-
-        if (data.success) {
-          alert("Key revogada com sucesso.");
-          await listarKeys();
-        } else {
-          alert(data.message || "Erro ao revogar.");
-        }
-      } catch (e) {
-        alert("Erro ao conectar no servidor.");
-      }
-    }
-
-    async function listarKeys() {
-      const table = document.getElementById("keysTable");
-      const total = document.getElementById("totalKeys");
-
-      table.innerHTML = "Carregando...";
-
-      try {
-        const res = await fetch(API + "/keys", {
-          headers: getAuthHeaders()
-        });
-
-        const data = await res.json();
-
-        if (res.status === 401) {
-          table.innerHTML = "";
-          total.innerHTML = "";
-          logout();
-          return;
-        }
-
-        if (!data.success) {
-          table.innerHTML = "Erro ao carregar keys.";
-          return;
-        }
-
-        total.innerHTML = "<strong>Total:</strong> " + data.total;
-
-        if (!data.keys.length) {
-          table.innerHTML = "Nenhuma key cadastrada.";
-          return;
-        }
-
-        table.innerHTML = `
-          <table>
-            <thead>
-              <tr>
-                <th>Key</th>
-                <th>Status</th>
-                <th>Dispositivo</th>
-                <th>Criada em</th>
-                <th>Expira em</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${data.keys.map(k => `
-                <tr>
-                  <td>${k.key}</td>
-                  <td><span class="${statusClass(k.status)}">${k.status}</span></td>
-                  <td>${k.usedBy || "-"}</td>
-                  <td>${formatDate(k.createdAt)}</td>
-                  <td>${formatDate(k.expiresAt)}</td>
-                  <td>
-                    ${k.revoked ? "-" : `<button class="btn-danger" onclick="revogarKey('${k.key}')">Revogar</button>`}
-                  </td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        `;
-      } catch (e) {
-        table.innerHTML = "Erro ao conectar no servidor.";
-      }
-    }
-
-    async function init() {
-      const savedUser = localStorage.getItem("adminUser");
-      const savedPass = localStorage.getItem("adminPass");
-
-      if (savedUser && savedPass) {
-        showPanel();
-        await listarKeys();
-      } else {
-        showLogin();
-      }
-    }
-
-    init();
-  </script>
+  init();
+</script>
 </body>
 </html>
