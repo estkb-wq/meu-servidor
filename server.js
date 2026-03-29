@@ -5,13 +5,13 @@ const path = require("path");
 const crypto = require("crypto");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // =========================
 // CONFIG ADMIN
 // =========================
-const ADMIN_USER = "admin";
-const ADMIN_PASS = "123456";
+const ADMIN_USER = process.env.ADMIN_USER || "admin";
+const ADMIN_PASS = process.env.ADMIN_PASS || "123456";
 
 app.use(cors());
 app.use(express.json());
@@ -77,6 +77,30 @@ function requireAdmin(req, res, next) {
   }
   next();
 }
+
+// =========================
+// ANTI-BYPASS BÁSICO
+// =========================
+app.use((req, res, next) => {
+  if (req.path === "/" || req.path === "/admin" || req.path === "/admin-login") {
+    return next();
+  }
+
+  const ua = String(req.headers["user-agent"] || "").toLowerCase();
+
+  if (
+    ua.includes("postman") ||
+    ua.includes("insomnia") ||
+    ua.includes("curl")
+  ) {
+    return res.status(403).json({
+      success: false,
+      message: "Acesso bloqueado."
+    });
+  }
+
+  next();
+});
 
 ensureFile(KEYS_FILE, []);
 ensureFile(DEVICES_FILE, []);
@@ -216,6 +240,7 @@ app.post("/activate-key", (req, res) => {
       });
     } else {
       existingDevice.key = key;
+      existingDevice.activatedAt = existingDevice.activatedAt || new Date().toISOString();
     }
 
     saveJSON(KEYS_FILE, keys);
@@ -370,6 +395,5 @@ app.post("/revoke-key", requireAdmin, (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
-  console.log(`Painel admin: http://localhost:${PORT}/admin`);
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
